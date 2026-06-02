@@ -1,0 +1,174 @@
+<div class="container-fluid py-4 fade-up">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <h3 class="fw-bold mb-1"><i class="bi bi-boxes me-2" style="color:#96bf48"></i>Bundle Builder</h3>
+      <p class="text-muted small mb-0">Pick {{ MIN_ITEMS }}–{{ MAX_ITEMS }} products, name your bundle, and save!</p>
+    </div>
+    <a routerLink="/cart" class="btn btn-outline-dark btn-sm">
+      <i class="bi bi-cart3 me-1"></i> View Cart
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left: Product Picker -->
+    <div class="col-lg-7">
+      <div class="card p-3 mb-3">
+        <div class="row g-2">
+          <div class="col-md-5">
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="searchQ"
+                   placeholder="🔍 Search products…">
+          </div>
+          <div class="col-md-4">
+            <select class="form-select form-select-sm" [(ngModel)]="filterCat">
+              <option value="">All Categories</option>
+              @for (c of categories(); track c) { <option [value]="c">{{ c }}</option> }
+            </select>
+          </div>
+          <div class="col-md-3 text-muted small d-flex align-items-center">
+            {{ filteredProducts().length }} products
+          </div>
+        </div>
+      </div>
+
+      @if (loading()) {
+        <div class="text-center py-5"><div class="spinner-border"></div></div>
+      } @else {
+        <div class="row row-cols-2 row-cols-md-3 g-3" style="max-height:600px;overflow-y:auto">
+          @for (p of filteredProducts(); track p._id) {
+            <div class="col">
+              <div class="card h-100 p-2" style="cursor:pointer;border:2px solid"
+                   [style.border-color]="isSelected(p._id) ? '#96bf48' : '#e8e8e8'"
+                   [style.background]="isSelected(p._id) ? '#f0fff0' : 'white'"
+                   (click)="addItem(p)">
+                <img [src]="p.images[0] || 'https://via.placeholder.com/200x120'" [alt]="p.name"
+                     style="width:100%;height:120px;object-fit:cover;border-radius:6px" class="mb-2">
+                <div class="small text-muted">{{ p.category }}</div>
+                <div class="fw-semibold" style="font-size:.82rem;line-height:1.3">{{ p.name }}</div>
+                <div class="fw-bold mt-1 text-success">${{ p.price | number:'1.2-2' }}</div>
+                @if (isSelected(p._id)) {
+                  <div class="mt-1"><span class="badge" style="background:#96bf48">✓ In Bundle</span></div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Right: Bundle Summary -->
+    <div class="col-lg-5">
+      <div class="card p-4 sticky-top" style="top:80px">
+        <h5 class="fw-bold mb-3">Your Bundle</h5>
+
+        <!-- Bundle Name -->
+        <div class="mb-3">
+          <label class="form-label small fw-medium">Bundle Name</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="bundleName">
+        </div>
+
+        <!-- Discount Settings -->
+        <div class="row g-2 mb-3">
+          <div class="col-7">
+            <label class="form-label small fw-medium">Discount Type</label>
+            <select class="form-select form-select-sm" [(ngModel)]="discountType" (change)="updatePricing()">
+              <option value="percentage">Percentage (%)</option>
+              <option value="fixed">Fixed Amount ($)</option>
+            </select>
+          </div>
+          <div class="col-5">
+            <label class="form-label small fw-medium">Value</label>
+            <input type="number" class="form-control form-control-sm" [(ngModel)]="discountValue"
+                   (change)="updatePricing()" min="0" [max]="discountType==='percentage'?100:9999">
+          </div>
+        </div>
+
+        <!-- Selected Items -->
+        <div class="mb-3" style="min-height:120px">
+          @if (selectedItems().length === 0) {
+            <div class="text-center py-4 text-muted">
+              <div style="font-size:2rem">📦</div>
+              <div class="small">Click products on the left to add them</div>
+            </div>
+          } @else {
+            @for (item of selectedItems(); track item.product._id) {
+              <div class="d-flex align-items-center gap-2 py-2 border-bottom">
+                <img [src]="item.product.images[0]" style="width:40px;height:40px;object-fit:cover;border-radius:6px">
+                <div class="flex-grow-1 small">
+                  <div class="fw-medium">{{ item.product.name }}</div>
+                  <div class="text-muted">${{ item.product.price | number:'1.2-2' }} × {{ item.quantity }}</div>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                  <button class="btn btn-sm btn-outline-secondary py-0 px-1" style="font-size:.8rem"
+                          (click)="updateQty(item.product._id, item.quantity - 1)">−</button>
+                  <span class="small fw-bold">{{ item.quantity }}</span>
+                  <button class="btn btn-sm btn-outline-secondary py-0 px-1" style="font-size:.8rem"
+                          (click)="updateQty(item.product._id, item.quantity + 1)">+</button>
+                  <button class="btn btn-sm btn-link text-danger p-0 ms-1" (click)="removeItem(item.product._id)">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Progress indicator -->
+        <div class="d-flex gap-1 mb-3">
+          @for (i of [].constructor(MAX_ITEMS); track $index) {
+            <div class="flex-fill" style="height:4px;border-radius:2px"
+                 [style.background]="$index < selectedItems().length ? '#96bf48' : '#e8e8e8'"></div>
+          }
+        </div>
+        <div class="text-muted small mb-3">
+          {{ selectedItems().length }}/{{ MAX_ITEMS }} items
+          @if (selectedItems().length < MIN_ITEMS) {
+            <span class="text-danger"> (min {{ MIN_ITEMS }})</span>
+          }
+        </div>
+
+        <!-- Pricing -->
+        @if (pricing()) {
+          <div class="p-3 rounded-3 mb-3" style="background:#f0fff0;border:1px solid #96bf48">
+            <div class="d-flex justify-content-between small mb-1">
+              <span>Original</span>
+              <span class="text-muted text-decoration-line-through">${{ pricing()!.original | number:'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between small mb-1 text-danger">
+              <span>Discount ({{ discountValue }}{{ discountType === 'percentage' ? '%' : '$' }} off)</span>
+              <span>-${{ pricing()!.discount | number:'1.2-2' }}</span>
+            </div>
+            <hr class="my-1">
+            <div class="d-flex justify-content-between fw-bold">
+              <span>Bundle Price</span>
+              <span class="text-success fs-5">${{ pricing()!.final | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- Actions -->
+        @if (!saved()) {
+          <button class="btn w-100 text-dark fw-semibold mb-2" style="background:#96bf48"
+                  (click)="saveBundle()" [disabled]="!canSave() || saving()">
+            @if (saving()) { <span class="spinner-border spinner-border-sm me-2"></span> Saving… }
+            @else { <i class="bi bi-bookmark-plus me-1"></i> Save Bundle }
+          </button>
+          <button class="btn btn-outline-secondary btn-sm w-100" (click)="reset()">Reset</button>
+        } @else {
+          <div class="alert alert-success py-2 mb-2">
+            <i class="bi bi-check-circle me-1"></i> Bundle saved!
+          </div>
+          @if (!addedToCart()) {
+            <button class="btn btn-dark w-100 mb-2" (click)="addBundleToCart()">
+              <i class="bi bi-cart-plus me-1"></i> Add Bundle to Cart
+            </button>
+          } @else {
+            <a routerLink="/cart" class="btn btn-success w-100 mb-2">
+              <i class="bi bi-cart-check me-1"></i> View Cart
+            </a>
+          }
+          <button class="btn btn-outline-secondary btn-sm w-100" (click)="reset()">Build Another</button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

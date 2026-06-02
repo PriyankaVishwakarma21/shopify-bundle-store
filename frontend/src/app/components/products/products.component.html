@@ -1,0 +1,86 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h3 class="fw-bold mb-0">All Products</h3>
+    <a routerLink="/bundle-builder" class="btn btn-sm text-dark fw-semibold px-3" style="background:#96bf48">
+      <i class="bi bi-boxes me-1"></i> Build a Bundle
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card p-3 mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label small fw-medium">Search</label>
+        <input type="text" class="form-control form-control-sm" [(ngModel)]="searchQuery"
+               placeholder="Search products…" (keyup.enter)="onFilter()">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-medium">Category</label>
+        <select class="form-select form-select-sm" [(ngModel)]="selectedCat" (change)="onFilter()">
+          <option value="">All Categories</option>
+          @for (cat of categories(); track cat) { <option [value]="cat">{{ cat }}</option> }
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-medium">Sort By</label>
+        <select class="form-select form-select-sm" [(ngModel)]="sortBy" (change)="loadProducts()">
+          <option value="newest">Newest</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="rating">Top Rated</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-dark btn-sm w-100" (click)="onFilter()">
+          <i class="bi bi-search me-1"></i> Search
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border"></div></div>
+  } @else if (products().length === 0) {
+    <div class="text-center py-5 text-muted">
+      <div style="font-size:3rem" class="mb-3">😕</div>
+      <p>No products found. Try adjusting your filters.</p>
+    </div>
+  } @else {
+    <div class="mb-3 text-muted small">{{ products().length }} products found</div>
+    <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-3">
+      @for (p of products(); track p._id) {
+        <div class="col">
+          <div class="product-card h-100 fade-up">
+            <div class="position-relative">
+              <img [src]="p.images[0] || 'https://via.placeholder.com/400x220?text=Product'"
+                   [alt]="p.name" class="product-image">
+              @if (discount(p)) {
+                <span class="badge-save position-absolute top-0 end-0 m-2">-{{ discount(p) }}%</span>
+              }
+            </div>
+            <div class="p-3 d-flex flex-column h-100">
+              <div class="small text-muted mb-1">{{ p.category }}</div>
+              <h6 class="fw-semibold mb-1 flex-grow-1" style="font-size:.88rem;line-height:1.4">{{ p.name }}</h6>
+              <div class="d-flex align-items-center gap-1 mb-1">
+                <span class="text-warning small">{{ '★'.repeat(Math.round(p.rating)) }}</span>
+                <span class="text-muted" style="font-size:.75rem">({{ p.reviewCount }})</span>
+              </div>
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="fw-bold fs-6">${{ p.price | number:'1.2-2' }}</span>
+                @if (p.compareAt) {
+                  <span class="text-muted text-decoration-line-through small">${{ p.compareAt | number:'1.2-2' }}</span>
+                }
+              </div>
+              <button class="btn btn-sm w-100 text-white mt-auto" style="background:#333"
+                      (click)="addToCart(p._id)" [disabled]="added() === p._id">
+                @if (added() === p._id) { <i class="bi bi-check-lg me-1"></i> Added! }
+                @else { <i class="bi bi-cart-plus me-1"></i> Add to Cart }
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

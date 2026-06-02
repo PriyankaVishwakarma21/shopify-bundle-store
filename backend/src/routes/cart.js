@@ -1,0 +1,10 @@
+import express from 'express';
+import { getCart, addProduct, addBundle, updateItem, removeItem, clearCart } from '../controllers/cartController.js';
+const router = express.Router();
+router.get('/:sessionId',                getCart);
+router.post('/:sessionId/product',       addProduct);
+router.post('/:sessionId/bundle',        addBundle);
+router.patch('/:sessionId/item/:itemId', updateItem);
+router.delete('/:sessionId/item/:itemId',removeItem);
+router.delete('/:sessionId',             clearCart);
+export default router;

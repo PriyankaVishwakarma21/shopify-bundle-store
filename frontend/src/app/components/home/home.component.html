@@ -1,0 +1,92 @@
+<!-- Hero -->
+<section class="py-5 text-white text-center" style="background:linear-gradient(135deg,#333 0%,#555 100%);min-height:380px;display:flex;align-items:center">
+  <div class="container">
+    <h1 class="display-5 fw-bold mb-3">Build Your Perfect Bundle</h1>
+    <p class="lead mb-4 opacity-75">Mix &amp; match any products, get instant discounts. Shop smarter.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a routerLink="/bundle-builder" class="btn btn-lg px-5 fw-semibold text-dark" style="background:#96bf48">
+        <i class="bi bi-boxes me-2"></i>Start Building
+      </a>
+      <a routerLink="/products" class="btn btn-lg btn-outline-light px-5">Browse Products</a>
+    </div>
+    <div class="d-flex gap-4 justify-content-center mt-5 flex-wrap">
+      <div class="text-center"><div class="fs-4 fw-bold">2-8</div><div class="small opacity-75">Products per Bundle</div></div>
+      <div class="text-center"><div class="fs-4 fw-bold">10%+</div><div class="small opacity-75">Bundle Savings</div></div>
+      <div class="text-center"><div class="fs-4 fw-bold">Free</div><div class="small opacity-75">Shipping over $50</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4 text-center">
+      <div class="col-md-4">
+        <div class="card border-0 p-4 h-100">
+          <div style="font-size:2.5rem" class="mb-3">📦</div>
+          <h5 class="fw-bold">Custom Bundles</h5>
+          <p class="text-muted small">Choose 2–8 products, name your bundle, get automatic discounts.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 p-4 h-100">
+          <div style="font-size:2.5rem" class="mb-3">💰</div>
+          <h5 class="fw-bold">Instant Savings</h5>
+          <p class="text-muted small">The more you bundle, the more you save. Up to 20% off retail prices.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 p-4 h-100">
+          <div style="font-size:2.5rem" class="mb-3">🚚</div>
+          <h5 class="fw-bold">Free Shipping</h5>
+          <p class="text-muted small">Free shipping on all orders over $50. Fast and reliable delivery.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-4 pb-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold mb-0">Featured Products</h3>
+      <a routerLink="/products" class="btn btn-outline-dark btn-sm">View All <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+
+    @if (loading()) {
+      <div class="text-center py-5"><div class="spinner-border"></div></div>
+    } @else {
+      <div class="row row-cols-2 row-cols-md-3 row-cols-lg-3 g-3">
+        @for (p of featured(); track p._id) {
+          <div class="col">
+            <div class="product-card fade-up h-100">
+              <div class="position-relative">
+                <img [src]="p.images[0] || 'https://via.placeholder.com/400x220?text=No+Image'"
+                     [alt]="p.name" class="product-image">
+                @if (discount(p)) {
+                  <span class="badge-save position-absolute top-0 end-0 m-2">-{{ discount(p) }}%</span>
+                }
+              </div>
+              <div class="p-3">
+                <div class="small text-muted mb-1">{{ p.category }}</div>
+                <h6 class="fw-semibold mb-2" style="font-size:.9rem">{{ p.name }}</h6>
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <span class="fw-bold">${{ p.price | number:'1.2-2' }}</span>
+                  @if (p.compareAt) {
+                    <span class="text-muted text-decoration-line-through small">${{ p.compareAt | number:'1.2-2' }}</span>
+                  }
+                </div>
+                <button class="btn btn-sm w-100 text-white" style="background:#333"
+                        (click)="addToCart(p._id)" [disabled]="added() === p._id">
+                  @if (added() === p._id) { <i class="bi bi-check-lg me-1"></i> Added! }
+                  @else { <i class="bi bi-cart-plus me-1"></i> Add to Cart }
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>

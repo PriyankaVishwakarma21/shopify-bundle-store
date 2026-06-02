@@ -1,0 +1,53 @@
+/* ── BundleShop Global Styles ───────────────────────────────────────────────── */
+:root {
+  --shopify-green: #96bf48;
+  --shopify-dark:  #333;
+  --shopify-blue:  #0066cc;
+  --header-h:      64px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #f6f6f7;
+}
+
+/* ── Cards ──────────────────────────────────────────────────────────────────── */
+.product-card {
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  transition: box-shadow .2s, transform .2s;
+  cursor: pointer;
+  &:hover { box-shadow: 0 8px 24px rgba(0,0,0,.12); transform: translateY(-2px); }
+  .product-image { width:100%; height:220px; object-fit:cover; background:#f0f0f0; }
+}
+
+/* ── Bundle Builder ─────────────────────────────────────────────────────────── */
+.bundle-slot {
+  border: 2px dashed #d0d0d0;
+  border-radius: 12px;
+  min-height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  transition: border-color .2s, background .2s;
+  &.filled { border-style: solid; border-color: #96bf48; background: #f0fff0; }
+}
+
+/* ── Cart ───────────────────────────────────────────────────────────────────── */
+.cart-item {
+  border-bottom: 1px solid #f0f0f0;
+  &:last-child { border-bottom: none; }
+}
+
+/* ── Badges ─────────────────────────────────────────────────────────────────── */
+.badge-save { background: #e74c3c; color: white; font-size:.7rem; padding: .25em .5em; border-radius: 4px; }
+.badge-bundle { background: #27ae60; color: white; font-size:.7rem; padding: .25em .5em; border-radius: 4px; }
+
+/* ── Animations ─────────────────────────────────────────────────────────────── */
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.fade-up { animation: fadeUp .3s ease-out; }
